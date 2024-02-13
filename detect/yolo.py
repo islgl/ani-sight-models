@@ -12,6 +12,7 @@ class Yolo:
 
     Attributes:
         onnx_session: The onnxruntime session
+        device: The device to run the model, 'cuda' or 'cpu'
     """
 
     def __init__(self, weights_path: str = ROOT + '/models/yolov5s-animal-sim.onnx'):

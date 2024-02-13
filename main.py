@@ -40,8 +40,10 @@ async def invoke(request: Request):
         status_code = 500
 
     print("FC Invoke End RequestId: " + request_id)
-    return Response(content=json.dumps(result), status_code=status_code, media_type="application/json",
-                    headers={"x-fc-request-id": request_id, "msg": msg})
+    return Response(content=json.dumps(result),
+                    status_code=status_code,
+                    media_type="application/json",
+                    headers={"request-id": request_id, "msg": msg})
 
 
 def inference(image: np.ndarray) -> Tuple:
@@ -59,7 +61,7 @@ def inference(image: np.ndarray) -> Tuple:
     bboxes = yolo_inference(image)
 
     # SAM inference
-    sam = Sam()
+    sam = Sam(device='cuda')
     prompt = gen_prompt(bboxes)
     sam.register_image(image)
     masks = sam.get_mask(boxes=prompt)['masks']
