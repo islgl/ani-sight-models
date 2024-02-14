@@ -42,9 +42,9 @@ async def invoke(request: Request):
 
     try:
         image = bytes2img(image_bytes)
-        masks, bboxes = inference(image)
+        mask, bboxes = inference(image)
         data = {
-            "masks": masks,
+            "mask": mask,
             "bboxes": bboxes
         }
         content = CustomResponse(
@@ -77,7 +77,7 @@ def inference(image: np.ndarray) -> Tuple:
         image: The input image
 
     Returns:
-        masks: The masks of the objects in the image
+        mask: The mask of the objects in the image
         pred: The bounding boxes of the objects in the image
     """
 
@@ -92,10 +92,9 @@ def inference(image: np.ndarray) -> Tuple:
     prompt = gen_prompt(bboxes)
     sam.register_image(image)
     masks = sam.get_mask(boxes=prompt)['masks']
-    masks = masks > 0
-    masks = masks.tolist()
+    mask=masks[0][0].tolist()
 
-    return masks, bboxes
+    return mask, bboxes
 
 
 if __name__ == "__main__":

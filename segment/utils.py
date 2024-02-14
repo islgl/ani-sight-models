@@ -57,3 +57,4 @@ def show_masks(masks, image):
     plt.imshow(result)
     plt.axis('off')
     plt.show()
+
