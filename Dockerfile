@@ -12,7 +12,7 @@ ADD . /app
 
 # 安装项目依赖
 RUN pip install --no-cache-dir \
-    opencv-python \
+    opencv-python~=4.8.0.70 \
     numpy \
     fastapi \
     tqdm \

@@ -13,7 +13,14 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "AniSight inference service is running."}
+    content = CustomResponse(
+        "success",
+        "Server is running",
+    ).to_json()
+    return Response(
+        content=content,
+        status_code=200,
+    )
 
 
 @app.post("/invoke")
