@@ -1,4 +1,3 @@
-import json
 import uvicorn
 import numpy as np
 
@@ -7,6 +6,7 @@ from segment import Sam, gen_prompt
 from utils import bytes2img
 from fastapi import FastAPI, Request, Response
 from typing import Tuple
+from response import CustomResponse
 
 app = FastAPI()
 
@@ -16,34 +16,51 @@ async def root():
     return {"message": "AniSight inference service is running."}
 
 
-@app.get("/invoke")
+@app.post("/invoke")
 async def invoke(request: Request):
     request_id = request.headers.get("x-fc-request-id", "")
     print("FC Invoke Start RequestId: " + request_id)
 
     image_bytes = await request.body()
-    image = bytes2img(image_bytes)
+    if len(image_bytes) == 0:
+        content = CustomResponse(
+            "error",
+            "No image found",
+        ).to_json()
+        response = Response(
+            content=content,
+            status_code=500,
+        )
+        return response
 
     try:
+        image = bytes2img(image_bytes)
         masks, bboxes = inference(image)
-        result = {
+        data = {
             "masks": masks,
             "bboxes": bboxes
         }
-        msg = 'success'
-        status_code = 200
+        content = CustomResponse(
+            "success",
+            "Inference successful",
+            data
+        ).to_json()
+        response = Response(
+            content=content,
+            status_code=200,
+        )
     except Exception:
-        result = {
-            "error": "An error occurred during inference"
-        }
-        msg = 'failed'
-        status_code = 500
+        content = CustomResponse(
+            "error",
+            "Inference failed",
+        ).to_json()
+        response = Response(
+            content=content,
+            status_code=500,
+        )
 
     print("FC Invoke End RequestId: " + request_id)
-    return Response(content=json.dumps(result),
-                    status_code=status_code,
-                    media_type="application/json",
-                    headers={"request-id": request_id, "msg": msg})
+    return response
 
 
 def inference(image: np.ndarray) -> Tuple:
@@ -59,6 +76,9 @@ def inference(image: np.ndarray) -> Tuple:
 
     # YOLO inference
     bboxes = yolo_inference(image)
+
+    if bboxes == []:
+        return [], []
 
     # SAM inference
     sam = Sam(device='cuda')
