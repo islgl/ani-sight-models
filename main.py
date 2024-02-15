@@ -13,11 +13,10 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    content = CustomResponse(
-        "success",
-        "Server is running",
-    ).to_json()
-    return content
+   return {
+        "status": "success",
+        "message": "Server is running!",
+   }
 
 
 @app.post("/invoke")
@@ -27,11 +26,10 @@ async def invoke(request: Request):
 
     image_bytes = await request.body()
     if len(image_bytes) == 0:
-        content = CustomResponse(
-            "error",
-            "No image found",
-        ).to_json()
-        return content
+        return {
+            "status": "error",
+            "message": "No image found in the request body"
+        }
 
     try:
         image = bytes2img(image_bytes)
@@ -40,20 +38,20 @@ async def invoke(request: Request):
             "mask": mask,
             "bboxes": bboxes
         }
-        content = CustomResponse(
-            "success",
-            "Inference successful",
-            data
-        ).to_json()
+        result={
+            "status": "success",
+            "message": "Inference successful",
+            "data": data
+        }
         
     except Exception:
-        content = CustomResponse(
-            "error",
-            "Inference failed",
-        ).to_json()
+       result={
+            "status": "error",
+            "message": "Inference failed"
+        }
 
     print("FC Invoke End RequestId: " + request_id)
-    return content
+    return result
 
 
 def inference(image: np.ndarray) -> Tuple:
