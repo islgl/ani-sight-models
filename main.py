@@ -17,10 +17,7 @@ async def root():
         "success",
         "Server is running",
     ).to_json()
-    return Response(
-        content=content,
-        status_code=200,
-    )
+    return content
 
 
 @app.post("/invoke")
@@ -34,11 +31,7 @@ async def invoke(request: Request):
             "error",
             "No image found",
         ).to_json()
-        response = Response(
-            content=content,
-            status_code=500,
-        )
-        return response
+        return content
 
     try:
         image = bytes2img(image_bytes)
@@ -52,22 +45,15 @@ async def invoke(request: Request):
             "Inference successful",
             data
         ).to_json()
-        response = Response(
-            content=content,
-            status_code=200,
-        )
+        
     except Exception:
         content = CustomResponse(
             "error",
             "Inference failed",
         ).to_json()
-        response = Response(
-            content=content,
-            status_code=500,
-        )
 
     print("FC Invoke End RequestId: " + request_id)
-    return response
+    return content
 
 
 def inference(image: np.ndarray) -> Tuple:
