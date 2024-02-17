@@ -54,3 +54,4 @@ def base64dec(base64str: str) -> np.ndarray:
 
     imgdata = base64.b64decode(base64str)
     return cv2.imdecode(np.fromstring(imgdata, np.uint8), 1)
+

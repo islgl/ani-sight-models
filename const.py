@@ -8,3 +8,6 @@ CLASSES = \
     ['bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'tiger', 'antelope',
      'bobcat',
      'chimpanzee', 'hippopotamus', 'otter', 'rhino', 'panda']
+
+# OSS Path
+OSS_PATH = '/mnt/data/'

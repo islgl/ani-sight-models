@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir \
     tqdm \
     uvicorn \
     matplotlib \
-    onnxruntime-gpu
+    onnxruntime-gpu \
 
 # 暴露 FastAPI 使用的端口（默认为 8000）
 EXPOSE 8000

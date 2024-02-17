@@ -1,7 +1,6 @@
 import cv2
-import os
 import numpy as np
-from typing import List
+from typing import List, Tuple
 from const import CLASSES
 
 
@@ -15,17 +14,14 @@ def bbox_restore(pred: List, image: np.ndarray):
     return pred
 
 
-def draw_img(img: np.ndarray, pred, save_path: str):
+def draw_img(img: np.ndarray, pred, bbox_color: Tuple = (0, 255, 0), font_color: Tuple = (255, 0, 0)):
     for box in pred:
         x1, y1, x2, y2, conf, cls = box
-        x1, y1, x2, y2 = x1.astype(int), y1.astype(int), x2.astype(int), y2.astype(int)
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(img, f'{CLASSES[int(cls)]} {conf:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0),
+        cv2.rectangle(img, (x1, y1), (x2, y2), bbox_color, 2)
+        cv2.putText(img, f'{cls} {conf:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, font_color,
                     2)
-    os.makedirs(save_path, exist_ok=True)
-    save_path = os.path.join(save_path, 'result.jpg')
-    cv2.imwrite(save_path, img)
-    print(f"Image saved to {save_path}")
+    return img
+
 
 def id2class(pred: List):
     for i in range(len(pred)):

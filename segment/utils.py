@@ -48,9 +48,8 @@ def gen_prompt(boxes: List):
     return prompt
 
 
-def show_masks(masks, image):
+def show_mask(mask, image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    mask = masks[0][0]
     mask = np.expand_dims(mask, axis=2)
     result = image * mask
 
@@ -58,3 +57,11 @@ def show_masks(masks, image):
     plt.axis('off')
     plt.show()
 
+
+def apply_mask(image, mask):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+    transparent_image = np.zeros_like(image)
+    transparent_image[mask == 0] = [0, 0, 0, 0]
+    transparent_image[mask != 0] = image[mask != 0]
+
+    return transparent_image
