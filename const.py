@@ -10,4 +10,4 @@ CLASSES = \
      'chimpanzee', 'hippopotamus', 'otter', 'rhino', 'panda']
 
 # OSS Path
-OSS_PATH = '/mnt/data/'
+OSS_PATH = '/Users/lgl/mnt/data/'

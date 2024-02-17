@@ -9,6 +9,7 @@ from segment import Sam, gen_prompt, apply_mask
 from fastapi import FastAPI
 from typing import Tuple
 from const import ROOT, OSS_PATH
+from utils import str2tuple
 
 app = FastAPI()
 
@@ -25,8 +26,8 @@ async def root():
     }
 
 
-@app.get("/intialize")
-async def intialize():
+
+def initialize():
     # Load models
     yolo_weights_path = ROOT + '/models/yolov5s-animal-sim.onnx'
     sam_enc_weights_path = ROOT + '/models/sam_vit_b_encoder.onnx'
@@ -46,9 +47,12 @@ async def intialize():
 @app.get("/invoke")
 async def invoke(image_id: int,
                  image_name: str,
-                 bbox_color: Tuple[int, int, int] = (0, 255, 0),
-                 font_color: Tuple[int, int, int] = (255, 0, 0)):
+                 bbox_color: str='(0, 255, 0)',
+                 font_color: str='(255, 0, 0)'):
     image_path = os.path.join(OSS_PATH, 'images', image_name)
+    bbox_color = str2tuple(bbox_color)
+    font_color = str2tuple(font_color)
+
     if not os.path.exists(image_path):
         result = {
             "status": "error",
@@ -64,7 +68,7 @@ async def invoke(image_id: int,
         image = cv2.imread(image_path)
         mask, bboxes = inference(image)
 
-        mask_name = str(image_id) + '.png'
+        mask_name = image_name.split('.')[0] + '.png'
 
         mask_path = os.path.join(OSS_PATH, 'masks', mask_name)
         label_path = os.path.join(OSS_PATH, 'labels', image_name)
@@ -76,7 +80,10 @@ async def invoke(image_id: int,
         labeled_img = draw_img(image, bboxes, bbox_color, font_color)
 
         cv2.imwrite(mask_path, masked_img)
+        print('save labeled image...')
+
         cv2.imwrite(label_path, labeled_img)
+        print('save masked image...')
 
         data = {
             "image_id": image_id,
@@ -114,6 +121,8 @@ def inference(image: np.ndarray) -> Tuple:
         mask: The mask of the objects in the image
         pred: The bounding boxes of the objects in the image
     """
+
+    initialize()
 
     global yolo_ort_session
     global sam_enc_ort_session

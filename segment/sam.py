@@ -2,10 +2,7 @@ import numpy as np
 import onnxruntime as ort
 from typing import Union, Dict
 from .codec import Encoder, Decoder
-from utils import singleton
 
-
-@singleton
 class Sam:
     """Sam predict class
 

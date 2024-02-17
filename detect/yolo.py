@@ -1,10 +1,7 @@
 import cv2
 import onnxruntime as ort
 import numpy as np
-from utils import singleton
 
-
-@singleton
 class Yolo:
     """ YOLOv5s-Animal
 

@@ -12,13 +12,13 @@ ADD . /app
 
 # 安装项目依赖
 RUN pip install --no-cache-dir \
-    opencv-python~=4.5.64 \
+    opencv-python~=4.5.2.52 \
     numpy \
     fastapi \
     tqdm \
     uvicorn \
     matplotlib \
-    onnxruntime-gpu \
+    onnxruntime-gpu
 
 # 暴露 FastAPI 使用的端口（默认为 8000）
 EXPOSE 8000
