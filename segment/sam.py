@@ -1,8 +1,9 @@
 import numpy as np
-from typing import Union,Dict
+import onnxruntime as ort
+from typing import Union, Dict
 from .codec import Encoder, Decoder
-from const import ROOT
 from utils import singleton
+
 
 @singleton
 class Sam:
@@ -11,19 +12,15 @@ class Sam:
     This class integrate the image encoder, prompt encoder and lightweight mask decoder.
 
     Args:
-        vit_model_path: the path of vit encoder.
-        decoder_model_path: the prompt encoder and lightweight mask decoder path.
-        device: Inference device, user can choose 'cuda' or 'cpu'. default to 'cuda'.
-        warmup_epoch (int): Warmup, if set 0,the model won`t use random inputs to warmup. default to 5.
+        encoder_session: the encoder session.
+        decoder_session: the decoder session.
     """
 
     def __init__(self,
-                 encoder_model_path: str = ROOT + '/models/sam_vit_b_encoder.onnx',
-                 decoder_model_path: str = ROOT + '/models/sam_vit_b_decoder.onnx',
-                 device: str = "cpu",
-                 **kwargs):
-        self.encoder = Encoder(encoder_model_path, device, **kwargs)
-        self.decoder = Decoder(decoder_model_path, device, **kwargs)
+                 encoder_session: ort.InferenceSession,
+                 decoder_session: ort.InferenceSession):
+        self.encoder = Encoder(encoder_session)
+        self.decoder = Decoder(decoder_session)
 
         self.features = None
         self.origin_image_size = None
@@ -44,7 +41,7 @@ class Sam:
                  point_labels: Union[list, np.ndarray] = None,
                  boxes: Union[list, np.ndarray] = None,
                  mask_input: Union[list, np.ndarray] = None
-                 ) ->Dict :
+                 ) -> Dict:
         """get the segment mask
 
         This function input prompts to segment input image.

@@ -1,20 +1,22 @@
 import numpy as np
+import onnxruntime as ort
 from .yolo import Yolo
 from .utils import bbox_restore, id2class, filter_box
 from typing import List
 
 
-def yolo_inference(image: np.ndarray) -> List:
+def yolo_inference(image: np.ndarray, onnx_session: ort.InferenceSession) -> List:
     """ YOLO inference
 
     Args:
         image: The image to be detected
+        onnx_session: The onnxruntime session
 
     Returns:
         The detected results [[x1, y1, x2, y2, conf, cls], ...]
     """
 
-    yolo = Yolo()
+    yolo = Yolo(onnx_session)
     pred = yolo.inference(image)
     pred = filter_box(pred)
     pred = bbox_restore(pred, image)

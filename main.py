@@ -1,22 +1,46 @@
+import cv2
 import uvicorn
 import numpy as np
+import onnxruntime as ort
 
 from detect import yolo_inference
 from segment import Sam, gen_prompt
 from utils import bytes2img
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request
 from typing import Tuple
-from response import CustomResponse
+from const import ROOT
 
 app = FastAPI()
+
+global yolo_ort_session
+global sam_enc_ort_session
+global sam_dec_ort_session
 
 
 @app.get("/")
 async def root():
-   return {
+    return {
         "status": "success",
         "message": "Server is running!",
-   }
+    }
+
+
+# @app.get("/intialize")
+def intialize():
+    # Load models
+    yolo_weights_path = ROOT + '/models/yolov5s-animal-sim.onnx'
+    sam_enc_weights_path = ROOT + '/models/sam_vit_b_encoder.onnx'
+    sam_dec_weights_path = ROOT + '/models/sam_vit_b_decoder.onnx'
+
+    global yolo_ort_session
+    global sam_enc_ort_session
+    global sam_dec_ort_session
+
+    provider = ['CUDAExecutionProvider']
+
+    yolo_ort_session = ort.InferenceSession(yolo_weights_path, providers=provider)
+    sam_enc_ort_session = ort.InferenceSession(sam_enc_weights_path, providers=provider)
+    sam_dec_ort_session = ort.InferenceSession(sam_dec_weights_path, providers=provider)
 
 
 @app.post("/invoke")
@@ -38,14 +62,14 @@ async def invoke(request: Request):
             "mask": mask,
             "bboxes": bboxes
         }
-        result={
+        result = {
             "status": "success",
             "message": "Inference successful",
             "data": data
         }
-        
+
     except Exception:
-       result={
+        result = {
             "status": "error",
             "message": "Inference failed"
         }
@@ -65,21 +89,30 @@ def inference(image: np.ndarray) -> Tuple:
         pred: The bounding boxes of the objects in the image
     """
 
-    # YOLO inference
-    bboxes = yolo_inference(image)
+    global yolo_ort_session
+    global sam_enc_ort_session
+    global sam_dec_ort_session
 
-    if bboxes == []:
+    # YOLO inference
+    bboxes = yolo_inference(image, yolo_ort_session)
+
+    if not bboxes:
         return [], []
 
     # SAM inference
-    sam = Sam(device='cuda')
+    sam = Sam(sam_enc_ort_session, sam_dec_ort_session)
     prompt = gen_prompt(bboxes)
     sam.register_image(image)
     masks = sam.get_mask(boxes=prompt)['masks']
-    mask=masks[0][0].tolist()
+    mask = masks[0][0].tolist()
 
     return mask, bboxes
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    img_path = '/Users/lgl/code/python/code/sheep.jpg'
+    intialize()
+    image = cv2.imread(img_path)
+    mask, bboxes = inference(image)

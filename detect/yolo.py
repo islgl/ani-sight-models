@@ -1,8 +1,6 @@
 import cv2
-import os
 import onnxruntime as ort
 import numpy as np
-from const import ROOT
 from utils import singleton
 
 
@@ -12,16 +10,11 @@ class Yolo:
 
     Attributes:
         onnx_session: The onnxruntime session
-        device: The device to run the model, 'cuda' or 'cpu'
     """
 
-    def __init__(self, weights_path: str = ROOT + '/models/yolov5s-animal-sim.onnx'):
-        if not weights_path.endswith('.onnx'):
-            raise ValueError('Weights file must be .onnx file')
-        if not os.path.exists(weights_path):
-            raise FileNotFoundError(f'Weights file not found: {weights_path}')
+    def __init__(self, onnx_session: ort.InferenceSession):
 
-        self.onnx_session = ort.InferenceSession(weights_path)
+        self.onnx_session = onnx_session
         self._input_name, self._output_name = self._get_input_output_names()
         self._input_size = (640, 640)
 

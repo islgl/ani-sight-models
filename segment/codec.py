@@ -11,28 +11,13 @@ class Encoder:
     """ SAM image encoder, which can extract feature from input image.
 
     Args:
-        model_path (str): Encoder model path.
-        device (str): Inference device, user can choose 'cuda' or 'cpu'. default to 'cuda'.
-        warmup_epoch (int): Warmup, if set 0,the model won`t use random inputs to warmup. default to 5.
+        session: the onnxruntime session of SAM encoder.
     """
 
     def __init__(self,
-                 model_path: str,
-                 device: str = "cpu",
-                 **kwargs):
-        opt = ort.SessionOptions()
-
-        if device == "cuda":
-            provider = ['CUDAExecutionProvider']
-        elif device == "cpu":
-            provider = ['CPUExecutionProvider']
-        else:
-            raise ValueError("Invalid device, please use 'cuda' or 'cpu' device.")
-
-        self.session = ort.InferenceSession(model_path,
-                                            opt,
-                                            providers=provider,
-                                            **kwargs)
+                 session: ort.InferenceSession):
+        print("loading encoder model...")
+        self.session = session
 
         self.input_name = self.session.get_inputs()[0].name
         self.input_shape = self.session.get_inputs()[0].shape
@@ -101,31 +86,17 @@ class Decoder:
     This class is the sam prompt encoder and lightweight mask decoder.
 
     Args:
-        model_path (str): decoder model path.
-        device (str): Inference device, user can choose 'cuda' or 'cpu'. default to 'cuda'.
-        warmup_epoch (int): Warmup, if set 0,the model won`t use random inputs to warmup. default to 10.
+        session: the onnxruntime session of SAM decoder.
     """
     img_size = (1024, 1024)
     mask_threshold = 0.0
 
     def __init__(self,
-                 model_path: str,
-                 device: str = "cpu",
-                 **kwargs):
-        opt = ort.SessionOptions()
+                 session: ort.InferenceSession):
 
-        if device == "cuda":
-            provider = ['CUDAExecutionProvider']
-        elif device == "cpu":
-            provider = ['CPUExecutionProvider']
-        else:
-            raise ValueError("Invalid device, please use 'cuda' or 'cpu' device.")
+        print("loading decoder model...")
+        self.session = session
 
-        # print("loading decoder model...")
-        self.session = ort.InferenceSession(model_path,
-                                            opt,
-                                            providers=provider,
-                                            **kwargs)
     def run(self,
             img_embeddings: np.ndarray,
             origin_image_size: Union[list, tuple],
