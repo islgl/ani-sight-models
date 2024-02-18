@@ -9,7 +9,7 @@ from segment import Sam, gen_prompt, apply_mask
 from fastapi import FastAPI
 from typing import Tuple
 from const import ROOT, OSS_PATH
-from utils import str2tuple
+from utils import str2tuple 
 
 app = FastAPI()
 
