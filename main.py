@@ -1,6 +1,6 @@
 import cv2
-import uvicorn
 import os
+import uvicorn
 import numpy as np
 import onnxruntime as ort
 
@@ -9,7 +9,7 @@ from segment import Sam, gen_prompt, apply_mask
 from fastapi import FastAPI
 from typing import Tuple
 from const import ROOT, OSS_PATH
-from utils import str2tuple 
+from utils import str2tuple
 
 app = FastAPI()
 
@@ -24,7 +24,6 @@ async def root():
         "status": "success",
         "message": "Server is running!",
     }
-
 
 
 def initialize():
